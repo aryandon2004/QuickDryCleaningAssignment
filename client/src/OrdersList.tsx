@@ -4,6 +4,7 @@ import type { Order } from './App';
 interface Props {
   orders: Order[];
   onUpdateGarment?: (orderId: string, garmentId: string, status: string) => void;
+  selectedStatus?: 'all' | 'received' | 'in_cleaning' | 'ready' | 'delivered';
 }
 
 const statusLabel: Record<string, string> = {
@@ -13,14 +14,23 @@ const statusLabel: Record<string, string> = {
   delivered: 'Delivered',
 };
 
-export const OrdersList: React.FC<Props> = ({ orders, onUpdateGarment }) => {
-  if (orders.length === 0) {
+export const OrdersList: React.FC<Props> = ({ orders, onUpdateGarment, selectedStatus = 'all' }) => {
+  if (!orders || orders.length === 0) {
     return <p>No active orders.</p>;
+  }
+
+  // Build filtered view: keep garments that match selectedStatus (or all)
+  const filteredOrders = orders
+    .map((o) => ({ ...o, garments: o.garments.filter((g) => selectedStatus === 'all' || g.status === selectedStatus) }))
+    .filter((o) => o.garments.length > 0);
+
+  if (filteredOrders.length === 0) {
+    return <p>No garments match the selected status.</p>;
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {orders.map((order) => (
+      {filteredOrders.map((order) => (
         <div
           key={order.id}
           style={{

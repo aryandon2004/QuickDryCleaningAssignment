@@ -1,14 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Body,
-  Patch,
-  Query,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Patch, Query, NotFoundException } from '@nestjs/common';
 import { OrdersService, Order, GarmentStatus } from './orders.service';
 
 @Controller('orders')
@@ -19,6 +9,11 @@ export class OrdersController {
   getOrders(@Query('status') status?: GarmentStatus): Order[] {
     if (status) return this.ordersService.findAll({ status });
     return this.ordersService.findAll();
+  }
+
+  @Get('summary')
+  getSummary(): { [status: string]: number } {
+    return this.ordersService.getGarmentStatusSummary();
   }
 
   @Get(':id')

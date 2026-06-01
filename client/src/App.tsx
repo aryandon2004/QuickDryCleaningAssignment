@@ -19,6 +19,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'received' | 'in_cleaning' | 'ready' | 'delivered'>('all');
   const [customerName, setCustomerName] = useState<string>('');
   const [garmentsInput, setGarmentsInput] = useState<string>('');
 
@@ -105,6 +106,16 @@ export const App: React.FC = () => {
             <option value="delivered">Delivered</option>
           </select>
         </label>
+        <label>
+          Show garments:
+          <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value as any)}>
+            <option value="all">All</option>
+            <option value="received">Received</option>
+            <option value="in_cleaning">In Cleaning</option>
+            <option value="ready">Ready</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </label>
         <button onClick={() => fetchOrders()}>Refresh</button>
       </div>
 
@@ -124,7 +135,9 @@ export const App: React.FC = () => {
 
       {loading && <p>Loading orders...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      {!loading && !error && <OrdersList orders={orders} onUpdateGarment={updateGarment} />}
+      {!loading && !error && (
+        <OrdersList orders={orders} onUpdateGarment={updateGarment} selectedStatus={selectedStatus} />
+      )}
     </div>
   );
 };

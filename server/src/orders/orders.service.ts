@@ -79,5 +79,20 @@ export class OrdersService {
     return garment;
   }
 
+  getGarmentStatusSummary(): { [status: string]: number } {
+    const counts: { [status: string]: number } = {};
+    for (const order of ORDERS) {
+      for (const g of order.garments) {
+        counts[g.status] = (counts[g.status] ?? 0) + 1;
+      }
+    }
+    // Remove any statuses with a 0 count (shouldn't exist) and return empty object if none
+    const result: { [status: string]: number } = {};
+    for (const k of Object.keys(counts)) {
+      if (counts[k] > 0) result[k] = counts[k];
+    }
+    return result;
+  }
+
   // NOTE: You will add more methods here in the implementation tasks.
 }
