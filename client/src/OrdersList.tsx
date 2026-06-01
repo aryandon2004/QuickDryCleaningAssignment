@@ -3,6 +3,7 @@ import type { Order } from './App';
 
 interface Props {
   orders: Order[];
+  onUpdateGarment?: (orderId: string, garmentId: string, status: string) => void;
 }
 
 const statusLabel: Record<string, string> = {
@@ -12,7 +13,7 @@ const statusLabel: Record<string, string> = {
   delivered: 'Delivered',
 };
 
-export const OrdersList: React.FC<Props> = ({ orders }) => {
+export const OrdersList: React.FC<Props> = ({ orders, onUpdateGarment }) => {
   if (orders.length === 0) {
     return <p>No active orders.</p>;
   }
@@ -35,8 +36,20 @@ export const OrdersList: React.FC<Props> = ({ orders }) => {
           <small>Created: {new Date(order.createdAt).toLocaleString()}</small>
           <ul>
             {order.garments.map((g) => (
-              <li key={g.id}>
-                {g.description} - <em>{statusLabel[g.status] ?? g.status}</em>
+              <li key={g.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ flex: 1 }}>{g.description}</span>
+                <em>{statusLabel[g.status] ?? g.status}</em>
+                <select
+                  value={g.status}
+                  onChange={(e) =>
+                    typeof onUpdateGarment === 'function' && onUpdateGarment(order.id, g.id, e.target.value)
+                  }
+                >
+                  <option value="received">Received</option>
+                  <option value="in_cleaning">In Cleaning</option>
+                  <option value="ready">Ready for Pickup</option>
+                  <option value="delivered">Delivered</option>
+                </select>
               </li>
             ))}
           </ul>

@@ -38,12 +38,45 @@ const ORDERS: Order[] = [
 
 @Injectable()
 export class OrdersService {
-  findAll(): Order[] {
-    return ORDERS;
+  findAll(filter?: { status?: GarmentStatus }): Order[] {
+    if (!filter || !filter.status) return ORDERS;
+    // Return orders that have at least one garment matching the status
+    return ORDERS.filter((o) => o.garments.some((g) => g.status === filter.status));
   }
 
   findOne(id: string): Order | undefined {
     return ORDERS.find((o) => o.id === id);
+  }
+
+  create(orderData: {
+    customerName: string;
+    garments: { description: string; status: GarmentStatus }[];
+  }): Order {
+    const newOrder: Order = {
+      id: `ORD-${Math.floor(Math.random() * 9000) + 1000}`,
+      customerName: orderData.customerName,
+      createdAt: new Date().toISOString(),
+      garments: orderData.garments.map((g, idx) => ({
+        id: `G-${Date.now()}-${idx}`,
+        description: g.description,
+        status: g.status,
+      })),
+    };
+    ORDERS.push(newOrder);
+    return newOrder;
+  }
+
+  updateGarmentStatus(
+    orderId: string,
+    garmentId: string,
+    status: GarmentStatus,
+  ): Garment | undefined {
+    const order = this.findOne(orderId);
+    if (!order) return undefined;
+    const garment = order.garments.find((g) => g.id === garmentId);
+    if (!garment) return undefined;
+    garment.status = status;
+    return garment;
   }
 
   // NOTE: You will add more methods here in the implementation tasks.
