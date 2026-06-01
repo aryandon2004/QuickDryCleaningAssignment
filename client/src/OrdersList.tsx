@@ -3,6 +3,8 @@ import type { Order } from './App';
 
 interface Props {
   orders: Order[];
+  onUpdateGarment?: (orderId: string, garmentId: string, status: string) => void;
+  selectedStatus?: 'all' | 'received' | 'in_cleaning' | 'ready' | 'delivered';
 }
 
 const statusLabel: Record<string, string> = {
@@ -12,14 +14,23 @@ const statusLabel: Record<string, string> = {
   delivered: 'Delivered',
 };
 
-export const OrdersList: React.FC<Props> = ({ orders }) => {
-  if (orders.length === 0) {
+export const OrdersList: React.FC<Props> = ({ orders, onUpdateGarment, selectedStatus = 'all' }) => {
+  if (!orders || orders.length === 0) {
     return <p>No active orders.</p>;
+  }
+
+  // Build filtered view: keep garments that match selectedStatus (or all)
+  const filteredOrders = orders
+    .map((o) => ({ ...o, garments: o.garments.filter((g) => selectedStatus === 'all' || g.status === selectedStatus) }))
+    .filter((o) => o.garments.length > 0);
+
+  if (filteredOrders.length === 0) {
+    return <p>No garments match the selected status.</p>;
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {orders.map((order) => (
+      {filteredOrders.map((order) => (
         <div
           key={order.id}
           style={{
@@ -35,8 +46,20 @@ export const OrdersList: React.FC<Props> = ({ orders }) => {
           <small>Created: {new Date(order.createdAt).toLocaleString()}</small>
           <ul>
             {order.garments.map((g) => (
-              <li key={g.id}>
-                {g.description} - <em>{statusLabel[g.status] ?? g.status}</em>
+              <li key={g.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ flex: 1 }}>{g.description}</span>
+                <em>{statusLabel[g.status] ?? g.status}</em>
+                <select
+                  value={g.status}
+                  onChange={(e) =>
+                    typeof onUpdateGarment === 'function' && onUpdateGarment(order.id, g.id, e.target.value)
+                  }
+                >
+                  <option value="received">Received</option>
+                  <option value="in_cleaning">In Cleaning</option>
+                  <option value="ready">Ready for Pickup</option>
+                  <option value="delivered">Delivered</option>
+                </select>
               </li>
             ))}
           </ul>
