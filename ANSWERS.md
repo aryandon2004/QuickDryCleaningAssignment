@@ -82,9 +82,3 @@ Tradeoffs:
 
 ---
 
-I saved this file as `ANSWERS.md` at the repository root. Next steps I can take (pick any):
-- Add input validation (class-validator) and DTOs in the backend.
-- Add CI workflow (GitHub Actions) to run tests on PRs.
-- Add more unit/controller tests.
-
-Which should I do next?
